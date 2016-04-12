@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html ng-app="app">
+
+<head>
+    <title></title>
+    <style>
+    body {
+        margin: 0;
+        overflow-y: hidden;
+    }
+    
+    .flex-container {
+        padding: 0;
+        margin: 0;
+    }
+    
+    .flex-item {
+        position: absolute;
+        transition: width 0.5s, height 0.5s, top 0.5s, left 0.5s, font-size 0.5s;
+        background: purple;
+        color: white;
+        font-weight: bold;
+        font-size: 1em;
+        box-shadow: 0 0 0 1px white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .flex-item:hover {
+        background-color: blue;
+    }
+    
+    .flex-item.on {
+        font-size: 3em;
+        background-color: blue;
+        width: 100vw !important;
+        height: 100vh !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 10;
+    }
+    
+    .flex-item.off {
+        z-index: 10;
+    }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.3/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.3/angular-animate.js"></script>
+    <script>
+    var app = angular.module('app', ['ngAnimate']);
+
+    app.controller('ctrl', function($scope, $window) {
+
+        // rows and cols must currently be equal, wip...
+
+        var rows = 2;
+        var cols = 2;
+
+        var clicked = false;
+
+        $scope.toggleItem = function($event) {
+            if (clicked === false) {
+                angular.element($event.target).addClass('on');
+                clicked = true;
+            } else {
+                angular.element($event.target).addClass('off');
+                angular.element($event.target).removeClass('on');
+                clicked = false;
+                setTimeout(function() {
+                    angular.element($event.target).removeClass('off');
+                }, 500)
+            };
+        };
+
+        getDimensions(rows, cols);
+
+        function getDimensions(rows, cols) {
+            var w = angular.element($window);
+            $scope.$watch(
+                function() {
+                    var dim = {
+                        height: $window.innerHeight,
+                        width: $window.innerWidth
+                    };
+                    return dim;
+                },
+                function(dim) {
+
+                    var totalW = dim.width;
+                    var totalH = dim.height;
+
+                    var w = totalW / rows;
+                    var h = totalH / cols;
+
+                    var array = [];
+
+                    for (y = 0; y < rows; y++) {
+                        array.push([y]);
+                        for (x = 0; x < cols; x++) {
+                            var left = w * x;
+                            var lString = left + 'px';
+                            var top = h * y;
+                            var tString = top + 'px';
+                            var style = {
+                                top: tString,
+                                left: lString,
+                                width: w + 'px',
+                                height: h + 'px'
+                            };
+                            array[y].push(style);
+                        };
+                    };
+                    $scope.items = array;
+                    console.log(array);
+                },
+                true
+            );
+            w.bind('resize', function() {
+                $scope.$apply();
+            });
+        };
+
+    });
+    </script>
+</head>
+
+<body ng-controller="ctrl">
+    <div class="flex-container" ng-repeat="item in items">
+        <div ng-repeat="(key, value) in item" ng-if="key !== 0" ng-style="value" class="flex-item" ng-click="toggleItem($event)">{{item[0]}} - {{key}}</div>
+    </div>
+</body>
+
+</html>
