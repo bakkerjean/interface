@@ -1,0 +1,2 @@
+- open index.html
+- click on a square to see it fill the screen in fluent transition
